@@ -42,8 +42,8 @@ int execute_command(char *command)
 
 	/* Create a copy to avoid modifying the original PATH */
 	path_copy = strdup(path);
-
-	while ((dir = strtok(path_copy, ":")) != NULL)
+	dir = strtok(path_copy, ":");
+	while (dir != NULL)
 	{
 		/* Construct the full path */
 		snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
@@ -66,8 +66,7 @@ int execute_command(char *command)
 					fprintf(stderr, "Error: %s: failed to execute\n", full_path);
 
 				}
-				break; /* Exit after successful execution */
-				return (EXIT_SUCCESS);
+				return (EXIT_SUCCESS); /* Exit after successful execution */
 			}
 			else
 			{
