@@ -64,6 +64,7 @@ int execute_command(char *command)
 				{
 					/* Handle execve error */
 					fprintf(stderr, "Error: %s: failed to execute\n", full_path);
+
 				}
 				break; /* Exit after successful execution */
 				return (EXIT_SUCCESS);
@@ -77,16 +78,15 @@ int execute_command(char *command)
 				/* Handle abnormal child process termination */
 				return (EXIT_FAILURE);
 			}
-
-			path_copy = NULL; /* Reset strtok for next iteration */
-			dir = strtok(NULL, ":"); /* Get next directory */
-
-			/* If no path found, report command not found */
-			fprintf(stderr, "Error: %s: command not found\n", command);
-			free(path_copy); /* Free the allocated memory */
 		}
+
+		path_copy = NULL; /* Reset strtok for next iteration */
+		dir = strtok(NULL, ":"); /* Get next directory */
 	}
 
-	free(path_copy);
+	/* If no path found, report command not found */
+	fprintf(stderr, "Error: %s: command not found\n", command);
+	free(path_copy); /* Free the allocated memory */
+	
 	return (EXIT_FAILURE); /* Should never reach here */
 }
