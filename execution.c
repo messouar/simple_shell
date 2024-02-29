@@ -51,46 +51,40 @@ int execute_command(char *command)
 		/* Check if file exists and is executable */
 		if (access(full_path, X_OK) == 0)
 		{
-			/* Execute the command using the full path */
-			if (execve(full_path, argvec, environ) == -1)
+			/* Fork a child process */
+			pid = fork();
+			/* Handle fork error */
+
+			if (pid == -1)
+				return (EXIT_FAILURE);
+			else if (pid == 0)
 			{
-				/* Handle execve error */
-				fprintf(stderr, "Error: %s: failed to execute\n", full_path);
+				/* Execute the command using the full path */
+				if (execve(full_path, argvec, environ) == -1)
+				{
+					/* Handle execve error */
+					fprintf(stderr, "Error: %s: failed to execute\n", full_path);
+				}
+				break; /* Exit after successful execution */
+
+				path_copy = NULL; /* Reset strtok for next iteration */
+				dir = strtok(NULL, ":"); /* Get next directory */
+
+				/* If no path found, report command not found */
+				fprintf(stderr, "Error: %s: command not found\n", command);
+				free(path_copy); /* Free the allocated memory */
 			}
-			break; /* Exit after successful execution */
-		}
-
-		path_copy = NULL; /* Reset strtok for next iteration */
-		dir = strtok(NULL, ":"); /* Get next directory */
-	}
-
-	/* If no path found, report command not found */
-	fprintf(stderr, "Error: %s: command not found\n", command);
-	free(path_copy); /* Free the allocated memory */
-
-	/* Fork a child process */
-	pid = fork();
-	/* Handle fork error */
-	if (pid == -1)
-		return (EXIT_FAILURE);
-	else if (pid == 0)
-	{
-		/* Child process */
-		if (execve(command, argvec, environ) == -1)
-		{
-			/* Handle execve error */
-			fprintf(stderr, "Error: %s: command not found\n", command);
-			exit(EXIT_FAILURE);
+			else
+			{
+				/* Parent process */
+				wait(&status);
+				if (WIFEXITED(status))
+					return (WEXITSTATUS(status));
+				/* Handle abnormal child process termination */
+				return (EXIT_FAILURE);
+			}
 		}
 	}
-	else
-	{
-		/* Parent process */
-		wait(&status);
-		if (WIFEXITED(status))
-			return (WEXITSTATUS(status));
-		/* Handle abnormal child process termination */
-			return (EXIT_FAILURE);
-	}
+
 	return (EXIT_FAILURE); /* Should never reach here */
 }
